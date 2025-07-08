@@ -1,0 +1,105 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model citas {
+  id_cita             Int       @id @default(autoincrement())
+  id_paciente         Int
+  id_medico           Int
+  fecha               DateTime  @db.Date
+  hora                DateTime  @db.Time(6)
+  estado_cita         String?   @default("P") @db.Char(1)
+  estado_auditoria    String?   @default("1") @db.Char(1)
+  fecha_creacion      DateTime? @default(now()) @db.Timestamp(6)
+  fecha_actualizacion DateTime? @db.Timestamp(6)
+  medicos             medicos   @relation(fields: [id_medico], references: [id_medico], onDelete: NoAction, onUpdate: NoAction)
+  pacientes           pacientes @relation(fields: [id_paciente], references: [id_paciente], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model especialidades {
+  id_especialidad     Int       @id @default(autoincrement())
+  nombre              String    @unique @db.VarChar(100)
+  estado_auditoria    String?   @default("1") @db.Char(1)
+  fecha_creacion      DateTime? @default(now()) @db.Timestamp(6)
+  fecha_actualizacion DateTime? @db.Timestamp(6)
+  medicos             medicos[]
+}
+
+model horarios {
+  id_horario          Int       @id @default(autoincrement())
+  id_medico           Int
+  dia_semana          String    @db.Char(1)
+  hora_inicio         DateTime  @db.Time(6)
+  hora_fin            DateTime  @db.Time(6)
+  estado_auditoria    String?   @default("1") @db.Char(1)
+  fecha_creacion      DateTime? @default(now()) @db.Timestamp(6)
+  fecha_actualizacion DateTime? @db.Timestamp(6)
+  medicos             medicos   @relation(fields: [id_medico], references: [id_medico], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model medicos {
+  id_medico           Int            @id @default(autoincrement())
+  nombres             String         @db.VarChar(100)
+  apellidos           String         @db.VarChar(100)
+  correo              String?        @db.VarChar(100)
+  celular             String?        @db.VarChar(20)
+  id_especialidad     Int
+  estado_auditoria    String?        @default("1") @db.Char(1)
+  fecha_creacion      DateTime?      @default(now()) @db.Timestamp(6)
+  fecha_actualizacion DateTime?      @db.Timestamp(6)
+  citas               citas[]
+  horarios            horarios[]
+  especialidades      especialidades @relation(fields: [id_especialidad], references: [id_especialidad], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model pacientes {
+  id_paciente         Int             @id @default(autoincrement())
+  nombres             String          @db.VarChar(100)
+  apellidos           String          @db.VarChar(100)
+  edad                Int?
+  fecha_nacimineto    DateTime?       @db.Date
+  id_tipo_documento   Int
+  numero_documento    String          @unique @db.VarChar(20)
+  direccion           String?
+  correo              String?         @db.VarChar(100)
+  genero              String          @db.Char(1)
+  estado_auditoria    String?         @default("1") @db.Char(1)
+  fecha_creacion      DateTime?       @default(now()) @db.Timestamp(6)
+  fecha_actualizacion DateTime?       @db.Timestamp(6)
+  citas               citas[]
+  tipo_documentos     tipo_documentos @relation(fields: [id_tipo_documento], references: [id_tipo_documento], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model tipo_documentos {
+  id_tipo_documento   Int         @id @default(autoincrement())
+  nombre              String      @unique @db.VarChar(50)
+  estado_auditoria    String?     @default("1") @db.Char(1)
+  fecha_creacion      DateTime?   @default(now()) @db.Timestamp(6)
+  fecha_actualizacion DateTime?   @db.Timestamp(6)
+  pacientes           pacientes[]
+}
+
+model rol {
+  id_rol              Int       @id @default(autoincrement())
+  nombre              String    @db.VarChar(50)
+  estado_auditoria    String?   @default("1") @db.Char(1)
+  fecha_creacion      DateTime? @default(now()) @db.Timestamp(6)
+  fecha_actualizacion DateTime? @db.Timestamp(6)
+  usuario             usuario[]
+}
+
+model usuario {
+  id_usuario          Int       @id @default(autoincrement())
+  nombre_usuario      String    @unique @db.VarChar(100)
+  contrasena          String
+  estado_auditoria    String?   @default("1") @db.Char(1)
+  fecha_creacion      DateTime? @default(now()) @db.Timestamp(6)
+  fecha_actualizacion DateTime? @db.Timestamp(6)
+  id_rol              Int
+  rol                 rol       @relation(fields: [id_rol], references: [id_rol], onDelete: NoAction, onUpdate: NoAction, map: "fk_rol")
+}
