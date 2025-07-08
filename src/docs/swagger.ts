@@ -1,5 +1,4 @@
 import swaggerJsdoc from 'swagger-jsdoc';
-//texto de prueba
 
 const swaggerDefinition = {
     openapi: '3.0.0',
